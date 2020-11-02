@@ -1,0 +1,3 @@
+A simple webGL based qr code blink generator. It's cool mannnn....
+
+Use three.js as webgl framework, with generated bitmap from qr-code-generator

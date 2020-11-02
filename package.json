@@ -1,0 +1,15 @@
+{
+  "name": "qrblink",
+  "version": "1.0.0",
+  "description": "Qrblinker using webgl and qrcodegenerator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "three": "^0.122.0"
+  }
+}
