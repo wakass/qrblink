@@ -3,31 +3,44 @@ var $ = require('jquery');
 
 
 let camera, scene, renderer;
-let geometry, material, mesh;
+let geometry, shaderMaterial, mesh;
 
 
 $(document).ready(function(){
-	drawQR();
+	$('#qr_textinput').on('input', function() {
+		const text = $( this ).val();
+	    drawQR(text);
+	    window.planemesh.material.uniforms.u_qrcodeTexture.value.needsUpdate = true
+	});
+	
 	init();
+
+	drawQR($('#qr_textinput').val());
+
 	animate(0);
 	// renderer.render(scene,camera);
 
 });
 
-function drawQR() {
+
+
+
+function drawQR(text) {
 	var QRC = qrcodegen.QrCode;
-	var qr0 = QRC.encodeText("Hello, world!", QRC.Ecc.MEDIUM);
+	var qr0 = QRC.encodeText(text, QRC.Ecc.MEDIUM);
 
 	const canvas = $('#myawesomecanvas')[0]; //Get the actual dom element by indexing into the jquery array
 
 	qr0.drawCanvas(1, 0, canvas);
+	window.planemesh.material.uniforms.u_qrcodeSize.value = qr0.size;
+	
 
 }
 
 function init() {
 	const container = $('.container')[0];
-	const width = 500;
-	const height = 500;
+	const width = (window.innerHeight - window.innerHeight%2) /2;
+	const height = width;
 	console.log(width,height);
 	camera = new THREE.OrthographicCamera( width / -2, width / 2, height / 2, height / -2, -100, 100 );
 	
@@ -45,37 +58,22 @@ function init() {
 			uniforms: {
 				u_time: { value: 1.0 },
 				u_resolution: { value: new THREE.Vector2(width,height) },
-				u_qrcodeTexture: { type: "t", value: qrcodeTexture }
+				u_qrcodeTexture: { type: "t", value: qrcodeTexture },
+				u_qrcodeSize: { value: 21.0 }
 
 			}
 		}
 	);
 	
 
-	shaderMaterial.fragmentShader = `
-	uniform vec2 u_resolution;
-	uniform sampler2D u_qrcodeTexture;
-	uniform float u_time;
-
-	void main() {
-		
-		vec2 st = gl_FragCoord.xy/u_resolution.xy;
-
-		vec4 color = texture2D(u_qrcodeTexture, st);
-
-		// color = vec4(0.0,1.0,0.0,0.0);
-		gl_FragColor = vec4(color.xyz,0.0);
-	}	
-	`
 	shaderMaterial.fragmentShader =	`
 	uniform vec2 u_resolution;
 	uniform sampler2D u_qrcodeTexture;
 	uniform float u_time;
-
+	uniform float u_qrcodeSize;
 
 	vec3 colors_desat[8];
 
-	#define QR_SIZE 21.0
 	float random (in vec2 st) { 
     return fract(sin(dot(st.xy,
                          vec2(15.12312555,13.1213131)))
@@ -130,20 +128,22 @@ vec3 blend_ (in vec2 st) {
 
 //Guarantee a border around the pattern - QR specification
     #define PAT_OFFSET vec2(0.05,0.05)
-    #define PAT_SCALE 1.1
+    #define PAT_SCALE 1.2
 
-    vec2 pos = (vec2(st) - PAT_OFFSET)*QR_SIZE*PAT_SCALE;
+    vec2 pos = (vec2(st) - PAT_OFFSET)*u_qrcodeSize*PAT_SCALE;
     
     vec2 texCoord = st - PAT_OFFSET;
     vec3 n = texture2D(u_qrcodeTexture,texCoord*PAT_SCALE).rgb;
 
-    if ((n.r < 0.9) &&  //Masking of pattern
+    if ((n.r < 0.9) 
+    		&&  //Masking of pattern
             (st.x > PAT_OFFSET.x && 
              st.y > PAT_OFFSET.y)
             &&
             (st.x < (PAT_OFFSET.x + 1.0 /PAT_SCALE) && 
              st.y < (PAT_OFFSET.y + 1.0 /PAT_SCALE))
-            ) {
+            ) 
+            {
         n = blend_(pos);
     }
     else {
@@ -151,7 +151,8 @@ vec3 blend_ (in vec2 st) {
     }
     
     n= pow(n,vec3(1.5));
-    
+    texture2D(u_qrcodeTexture,texCoord*PAT_SCALE).rgb;
+
     gl_FragColor = vec4(n, 1.0);
 }`
 
@@ -180,9 +181,7 @@ function animate(timestamp) {
 		previous_timestamp = timestamp;
 		// planemesh.rotation.x += 0.01;
 		// planemesh.rotation.y += 0.02;
-		planemesh.material.uniforms.u_time.value += delta*0.01;
-
-		console.log(delta);
+		planemesh.material.uniforms.u_time.value += delta*0.001;
 
 		
 	}
