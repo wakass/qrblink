@@ -1,0 +1,48 @@
+From 3556307dfae3bcd6d44776e2c16f967f3efa4aba Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rub=C3=A9n=20L=C3=B3pez=20G=C3=B3mez?=
+ <rubeniskov@gmail.com>
+Date: Sat, 16 May 2020 17:21:05 +0200
+Subject: [PATCH] fix: add babel 7 plugin support
+
+---
+ glslify-babel.js | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/glslify-babel.js b/glslify-babel.js
+index 3eb5854..f19c51c 100644
+--- a/glslify-babel.js
++++ b/glslify-babel.js
+@@ -1,6 +1,15 @@
+ var dirname = require('path').dirname
+ var glslifyHack = require('./lib/glslify-sync-hack')
+ 
++const resolveFilename = (state) => {
++  if (state.file.log) {
++    // babel 6
++    return state.file.log.filename
++  }
++  // babel 7
++  return state.file.opts.filename
++}
++
+ module.exports = function (babel) {
+   function resolveImport (identifier, declaration) {
+     if (declaration.type === 'ImportDeclaration' &&
+@@ -156,7 +165,7 @@ module.exports = function (babel) {
+           return
+         }
+ 
+-        var filename = state.file.log.filename
++        var filename = resolveFilename(state);
+         var cwd = dirname(filename)
+         var env = {
+           cwd: cwd
+@@ -180,7 +189,7 @@ module.exports = function (babel) {
+           return
+         }
+ 
+-        var filename = state.file.log.filename
++        var filename = resolveFilename(state);
+         var cwd = dirname(filename)
+         var env = {
+           cwd: cwd
