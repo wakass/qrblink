@@ -1,8 +1,12 @@
 
 uniform vec2 u_resolution;
+
 uniform sampler2D u_qrcodeTexture;
+uniform sampler2D u_logoTexture;
+
 uniform float u_time;
 uniform float u_qrcodeSize;
+uniform float u_logoSize;
 
 vec3 colors_desat[8];
 
@@ -44,7 +48,7 @@ vec3 blend_ (in vec2 st) {
 
 	void main() {
 
-    
+    //Desurated colors of the qr code.
     colors_desat[0] = vec3(0.882, 0.416, 0.525);
     colors_desat[1] = vec3(0.788, 0.506, 0.149);
     colors_desat[2] = vec3(0.596, 0.588, 0 );
@@ -82,8 +86,15 @@ vec3 blend_ (in vec2 st) {
         n = vec3(1.0,1.0,1.0);
     }
     
-    n= pow(n,vec3(1.5));
-    texture2D(u_qrcodeTexture,texCoord*PAT_SCALE).rgb;
+    n = pow(n,vec3(1.5));
+    vec3 logo_n = texture2D(u_logoTexture,st).rgb;
+
+    if (logo_n.r < 0.1){
+        //if black pixel in logo
+        //make black :O
+        n = vec3(0.0,0.0,0.0);
+    }
+    // n = texture2D(u_qrcodeTexture,st).rgb;
 
     gl_FragColor = vec4(n, 1.0);
 }

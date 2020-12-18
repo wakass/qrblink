@@ -11,11 +11,29 @@ body {
   margin: 0;
 }
 .container {
-  /*background-image: url('images-16.jpg');*/
+  /*background-image: url('alab_2.png');*/
   /*background-size: 100%;*/
   /*position: float;*/
   /*width: 800px;*/
   /*height: 800px;*/
+  display:inline-block
+}
+.logo {
+  /*display: float;*/
+
+  /*background-image: url(alab_2.png);*/
+  /*width: 120px;*/
+  /*height: 50px;*/
+
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  object-fit:contain;
+
+  position: relative;
+  /*left: 200px;*/
+  /*top: 580px;  */
+  /*mix-blend-mode: multiply;*/
 }
   </style>
   <script src="./.js/qrcodegen.js"></script>
@@ -23,13 +41,19 @@ body {
 
 </head>
 <body>
-<input id='qr_textinput'>
-<canvas id="myawesomecanvas" width=200 height=200>
-</canvas>
 
-<div class='container' width=500 height=500 style="display:inline-block">
-	&nbsp;
- </div>
+<input id='qr_textinput' width=400>
+
+<canvas id="qrcodeDisplay"> </canvas>
+<canvas class='logo' id='logoDisplay' width=120 height=50> </canvas>
+
+
+<div class='container' width=500 height=500>
+	<!-- &nbsp; -->
+  
+</div>
+
+
 
 
 </body>

@@ -8,3 +8,7 @@ Use `npm install -g watchify` to install the "watch"  version of browserify (whi
 
 Have an index.js (e.g.) to store your code.
 `watchify index.js -o bundle.js`.
+
+
+## Caveat emptor
+For testing the canvas element with cross-site (local too) images, the canvas can get "tainted" and unusuble. To fix in firefox: In about:config change privacy.file_unique_origin to false. This prevents CORS checking.
