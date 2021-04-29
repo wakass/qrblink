@@ -10,6 +10,16 @@ uniform float u_logoSize;
 
 vec3 colors_desat[8];
 
+//Guarantee a border around the pattern - QR specification
+#define PAT_OFFSET vec2(0.05,0.05)
+#define PAT_SCALE 1.2
+
+#define LOGO_OFFSET vec2(-0.45,-0.45)
+#define LOGO_SCALE 2.5
+
+#define ST_OFFSET (gl_FragCoord.xy/u_resolution.xy - PAT_OFFSET)
+
+
 float random (in vec2 st) { 
     return fract(sin(dot(st.xy,
                          vec2(15.12312555,13.1213131)))
@@ -38,12 +48,20 @@ vec3 blend_ (in vec2 st) {
 
     // Cubic Hermine Curve, modified
     vec2 u = f*f*(2.41-3.14*f);
-     //u = smoothstep(0.,.9,f);
+    
+    //If the logo intersects the pixel, color the entire pixel according to this
+    vec2 logoCoord = ST_OFFSET*LOGO_SCALE + LOGO_OFFSET;
 
+    vec3 test_n = texture2D(u_logoTexture, logoCoord).rgb;
+
+    // if (test_n.r < 0.1) {
+    //     return vec3(0.5,0.5,0.5);
+    // }
     // Mix 4 corners percentages
-    return mix(a, b, u.x) +
-             (c - a) * u.y * (1.0 - u.x)+
-             (d - b) * u.x * u.y;
+    // return mix(a, b, u.x) +
+    //          (c - a) * u.y * (1.0 - u.x)+
+    //          (d - b) * u.x * u.y;
+    return a;
 }
 
 	void main() {
@@ -58,18 +76,13 @@ vec3 blend_ (in vec2 st) {
     colors_desat[6] = vec3(0.388, 0.565, 0.898);
     colors_desat[7] = vec3(0.769, 0.435, 0.855);
 
-
-
     vec2 st = gl_FragCoord.xy/u_resolution.xy;
-
-//Guarantee a border around the pattern - QR specification
-    #define PAT_OFFSET vec2(0.05,0.05)
-    #define PAT_SCALE 1.2
-
-    vec2 pos = (vec2(st) - PAT_OFFSET)*u_qrcodeSize*PAT_SCALE;
     
-    vec2 texCoord = st - PAT_OFFSET;
-    vec3 n = texture2D(u_qrcodeTexture,texCoord*PAT_SCALE).rgb;
+    vec2 pos = ST_OFFSET*u_qrcodeSize*PAT_SCALE;
+    
+    vec3 n = texture2D(u_qrcodeTexture,ST_OFFSET*PAT_SCALE).rgb;
+    vec3 logo_n = texture2D(u_logoTexture,ST_OFFSET*LOGO_SCALE+LOGO_OFFSET).rgb;
+    float alpha = 1.0;
 
     if ((n.r < 0.9) 
     		&&  //Masking of pattern
@@ -81,20 +94,15 @@ vec3 blend_ (in vec2 st) {
             ) 
             {
         n = blend_(pos);
+        alpha = 1.0;
     }
     else {
-        n = vec3(1.0,1.0,1.0);
+        n = vec3(0.0,0.0,0.0);
+        alpha = 0.0;
     }
     
     n = pow(n,vec3(1.5));
-    vec3 logo_n = texture2D(u_logoTexture,st).rgb;
+    gl_FragColor = vec4(n, alpha);
 
-    if (logo_n.r < 0.1){
-        //if black pixel in logo
-        //make black :O
-        n = vec3(0.0,0.0,0.0);
-    }
-    // n = texture2D(u_qrcodeTexture,st).rgb;
 
-    gl_FragColor = vec4(n, 1.0);
 }

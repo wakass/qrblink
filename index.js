@@ -9,8 +9,11 @@ var src = glsl('./shaders/qr.frag');
 let camera, scene, renderer;
 let geometry, shaderMaterial, mesh;
 
+var default_url = "https://www.paypal.com/donate/?hosted_button_id=LMUTVRN3YDGJE"
 
 $(document).ready(function(){
+	$("#qr_textinput").val(default_url);
+
 	$('#qr_textinput').on('input', function() {
 		const text = $( this ).val();
 	    drawQR(text);
@@ -35,8 +38,6 @@ $(document).ready(function(){
 	drawQR($('#qr_textinput').val());
 
 	animate(0);
-	// renderer.render(scene,camera);
-
 });
 
 
@@ -96,7 +97,7 @@ function init() {
 	
 	scene.add( planemesh );
 
-	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 	renderer.setSize( width, height );
 	$('.container').append( renderer.domElement );
 
